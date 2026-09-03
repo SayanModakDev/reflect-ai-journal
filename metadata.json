@@ -1,0 +1,10 @@
+{
+  "name": "AI Reflection Journal",
+  "description": "A secure, user-authenticated AI journaling and reflection web application with sentiment analysis, mood trendline tracking, and multimodal audio reflections powered by Gemini 3.6 Flash.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
