@@ -6,3 +6,9 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Firebase & Cloud credential configs
+firebase-applet-config.json
+firebase_applet_config.xml
+*credentials*.json
+service-account*.json
