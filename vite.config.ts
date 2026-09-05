@@ -41,8 +41,42 @@ export default defineConfig(({ mode }) => {
     // Ignore fallback errors
   }
 
+  const resolvedProjectId =
+    process.env.VITE_FIREBASE_PROJECT_ID ||
+    env.VITE_FIREBASE_PROJECT_ID ||
+    process.env.FIREBASE_PROJECT_ID ||
+    'reflectai-journal-app';
+
+  const resolvedApiKey =
+    process.env.VITE_FIREBASE_API_KEY ||
+    env.VITE_FIREBASE_API_KEY ||
+    '';
+
+  const resolvedAuthDomain =
+    process.env.VITE_FIREBASE_AUTH_DOMAIN ||
+    env.VITE_FIREBASE_AUTH_DOMAIN ||
+    `${resolvedProjectId}.firebaseapp.com`;
+
+  const resolvedDatabaseId =
+    process.env.VITE_FIREBASE_DATABASE_ID ||
+    env.VITE_FIREBASE_DATABASE_ID ||
+    process.env.FIREBASE_DATABASE_ID ||
+    '(default)';
+
+  const resolvedStorageBucket =
+    process.env.VITE_FIREBASE_STORAGE_BUCKET ||
+    env.VITE_FIREBASE_STORAGE_BUCKET ||
+    `${resolvedProjectId}.firebasestorage.app`;
+
   return {
     plugins: [react(), tailwindcss()],
+    define: {
+      'import.meta.env.VITE_FIREBASE_PROJECT_ID': JSON.stringify(resolvedProjectId),
+      'import.meta.env.VITE_FIREBASE_API_KEY': JSON.stringify(resolvedApiKey),
+      'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN': JSON.stringify(resolvedAuthDomain),
+      'import.meta.env.VITE_FIREBASE_DATABASE_ID': JSON.stringify(resolvedDatabaseId),
+      'import.meta.env.VITE_FIREBASE_STORAGE_BUCKET': JSON.stringify(resolvedStorageBucket),
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

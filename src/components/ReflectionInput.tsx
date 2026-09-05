@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Square, Sparkles, Send, Volume2, AlertCircle, RefreshCw, PenLine } from 'lucide-react';
 import { doc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
-import { db } from '../lib/firebase';
+import { db, auth } from '../lib/firebase';
+import { handleFirestoreError, OperationType } from '../lib/firestoreErrorHandler';
 import { JournalEntry } from '../types';
 
 interface ReflectionInputProps {
@@ -151,12 +152,25 @@ export const ReflectionInput: React.FC<ReflectionInputProps> = ({ onEntryCreated
 
       const data = await res.json();
       if (data.entry) {
-        // Guaranteed client sync into user's isolated Firestore path
-        if (user) {
+        // Guaranteed client sync into user's isolated Firestore path if cloud database is configured and user is authenticated
+        const isGuestOrNoAuth = (user as any)?.isGuest || !auth?.currentUser;
+        if (user && db && !isGuestOrNoAuth) {
+          const pathForWrite = `users/${user.uid}/entries/${data.entry.id}`;
           try {
             await setDoc(doc(db, "users", user.uid, "entries", data.entry.id), data.entry, { merge: true });
-          } catch (syncErr) {
-            console.warn("Client Firestore entry sync notice:", syncErr);
+          } catch (syncErr: any) {
+            const isPermissionErr =
+              syncErr?.code === 'permission-denied' ||
+              (typeof syncErr?.message === 'string' && syncErr.message.includes('Missing or insufficient permissions'));
+            if (isPermissionErr) {
+              try {
+                handleFirestoreError(syncErr, OperationType.WRITE, pathForWrite);
+              } catch (e) {
+                console.warn("Client Firestore entry sync permission notice:", e);
+              }
+            } else {
+              console.warn("Client Firestore entry sync notice:", syncErr);
+            }
           }
         }
 

@@ -59,8 +59,30 @@ Deploy the following security rules using the Firebase CLI (`firebase deploy --o
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // Global catch-all default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // User-isolated documents & collections
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /entries/{entryId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /{allSubpaths=**} {
+        allow read, write: if isOwner(userId);
+      }
     }
   }
 }
@@ -103,6 +125,9 @@ gcloud run services update ai-reflection-journal \
    - Client sends Firebase ID token in `Authorization: Bearer <token>` headers.
    - Server decodes and verifies tokens via `firebase-admin/auth` (`verifyIdToken`).
    - Unauthenticated visitors to `/dashboard` are immediately redirected to `/login`.
+   - **Authorized Domains Setup for Cloud Run**:
+     Firebase Authentication requires the Cloud Run service URL to be whitelisted.
+     Navigate to **Firebase Console** &rarr; **Authentication** &rarr; **Settings** &rarr; **Authorized domains**, click **Add domain**, and enter your Cloud Run domain (e.g. `*.run.app` or your specific service domain).
 
 2. **Gemini 3.6 Flash Multi-Turn & Multimodal Pipeline**:
    - Text & Voice reflections supported via browser MediaRecorder.

@@ -1,0 +1,70 @@
+{
+  "entities": {
+    "JournalEntry": {
+      "title": "JournalEntry",
+      "description": "User personal reflection entry with AI analysis and insights",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "userId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "prompt": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "response": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "moodScore": {
+          "type": "number"
+        },
+        "actionItems": {
+          "type": "array"
+        },
+        "isAudio": {
+          "type": "boolean"
+        },
+        "audioDurationSeconds": {
+          "type": "number"
+        },
+        "transcription": {
+          "type": "string",
+          "maxLength": 10000
+        },
+        "usedModel": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "userId", "title", "response", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/entries/{entryId}": {
+      "schema": "JournalEntry",
+      "description": "User-isolated journal entries and AI reflections"
+    }
+  }
+}
